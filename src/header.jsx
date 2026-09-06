@@ -1,21 +1,49 @@
-import { useEffect, useState } from 'react'
+import { animate, utils } from 'animejs';
+import { useEffect, useRef } from 'react';
 import './header.css';
 
+export default function Header() {
+  const containerRef = useRef(null);
 
+  useEffect(() => {
+    if (!containerRef.current) return;
 
-const Header = () =>  {
-    return(
-        <div>
-            <nav className='bg-amber-500'>
-                <ul className='flex gap-7.5 justify-end pr-7.5 pb-2.5 pt-2.5 '>
-                    <li className='cursor-pointer'>Home</li>
-                    <li className='cursor-pointer'>Products</li>
-                    <li className='cursor-pointer'>Services</li>
-                    <li className='cursor-pointer'>Contact Us</li>
-                </ul>
-            </nav>
+    const squareEl = containerRef.current.querySelector('.square');
+
+    let boundsValue = containerRef.current.getBoundingClientRect();
+
+    const refreshBounds = () => {
+      boundsValue = containerRef.current.getBoundingClientRect();
+    };
+
+    const onMouseMove = e => {
+      const { width, height, left, top } = boundsValue;
+      const hw = width / 2;
+      const hh = height / 2;
+      const x = utils.clamp(e.clientX - left - hw, -hw, hw);
+      const y = utils.clamp(e.clientY - top - hh, -hh, hh);
+      animate(squareEl, { x: x, y: y, duration: 500, ease: 'out(3)' });
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('resize', refreshBounds);
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('resize', refreshBounds);
+    };
+  }, []);
+
+  return (
+    <>
+      <div ref={containerRef} className="large centered row">
+        <div className="col">
+          <div className="square"></div>
         </div>
-    );
-};
-
-export default Header
+      </div>
+      <div className="small centered row">
+        <span className="label">Move cursor around</span>
+      </div>
+    </>
+  );
+}

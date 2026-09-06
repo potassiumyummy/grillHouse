@@ -1,1 +1,40 @@
 @import "tailwindcss";
+
+.square {
+  width: 100px;
+  height: 100px;
+  background-color: #aa3bff;
+  border-radius: 8px;
+  transform-box: fill-box;
+  transform-origin: center center;
+}
+
+.large {
+  width: 100%;
+  height: 400px;
+}
+
+.centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.small {
+  height: 60px;
+}
+
+.label {
+  font-size: 18px;
+  color: #6b6375;
+}
