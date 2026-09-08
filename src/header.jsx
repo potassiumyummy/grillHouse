@@ -1,49 +1,48 @@
-import { animate, utils } from 'animejs';
 import { useEffect, useRef } from 'react';
+import { createAnimatable, createScope } from 'animejs';
 import './header.css';
 
 export default function Header() {
-  const containerRef = useRef(null);
+  const navRef = useRef(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!navRef.current) return;
 
-    const squareEl = containerRef.current.querySelector('.square');
+    const scope = createScope({ root: navRef.current });
 
-    let boundsValue = containerRef.current.getBoundingClientRect();
+    scope.execute(() => {
+      const logoAnim = createAnimatable('.header-logo', { y: 0, ease: 'out(3)' });
+      const linkAnims = createAnimatable('.header-link', { y: 0, ease: 'out(3)' });
 
-    const refreshBounds = () => {
-      boundsValue = containerRef.current.getBoundingClientRect();
-    };
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              logoAnim.y(0, 600);
+              linkAnims.y(0, 600);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
 
-    const onMouseMove = e => {
-      const { width, height, left, top } = boundsValue;
-      const hw = width / 2;
-      const hh = height / 2;
-      const x = utils.clamp(e.clientX - left - hw, -hw, hw);
-      const y = utils.clamp(e.clientY - top - hh, -hh, hh);
-      animate(squareEl, { x: x, y: y, duration: 500, ease: 'out(3)' });
-    };
+      observer.observe(navRef.current);
 
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('resize', refreshBounds);
-
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('resize', refreshBounds);
-    };
+      return () => {
+        observer.disconnect();
+        scope.revert();
+      };
+    });
   }, []);
 
   return (
-    <>
-      <div ref={containerRef} className="large centered row">
-        <div className="col">
-          <div className="square"></div>
-        </div>
+    <nav ref={navRef} className="header-nav">
+      <span className="header-logo">Grill House</span>
+      <div className="header-links">
+        <a href="#menu" className="header-link">Menu</a>
+        <a href="#about" className="header-link">About</a>
+        <a href="#contact" className="header-link">Contact</a>
       </div>
-      <div className="small centered row">
-        <span className="label">Move cursor around</span>
-      </div>
-    </>
+    </nav>
   );
 }
